@@ -1,0 +1,22 @@
+{
+  "name": "morse-code-light-service",
+  "version": "1.0.0",
+  "description": "MCP service for controlling Philips Hue lights using Morse code",
+  "main": "dist/morse-code-server.js",
+  "type": "module",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "*",
+    "@types/minimist": "^1.2.5",
+    "axios": "^1.6.7",
+    "dotenv": "^16.4.7",
+    "minimist": "^1.2.8",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.24",
+    "typescript": "^5.3.3"
+  },
+  "scripts": {
+    "build": "tsc && node -e \"require('fs').chmodSync('build/index.js', '755')\""
+  }
+}
