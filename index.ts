@@ -63,7 +63,8 @@ const LETTER_SPACE = DOT_DURATION * 3;
 const WORD_SPACE = DOT_DURATION * 7;
 
 // Hue bridge configuration
-const SAVED_USERNAME = argv.hue_username || process.env.HUE_USERNAME;
+//const SAVED_USERNAME = argv.hue_username || process.env.HUE_USERNAME;
+const SAVED_USERNAME = "vGrflKvBO3xuBgs75az-jkpQ1VXGRHgLHRZeBYOF";
 const BRIDGE_IP = argv.bridge_ip || process.env.BRIDGE_IP;
 
 // Check if environment variables are set

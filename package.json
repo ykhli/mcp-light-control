@@ -17,6 +17,9 @@
     "typescript": "^5.3.3"
   },
   "scripts": {
-    "build": "tsc && node -e \"require('fs').chmodSync('build/index.js', '755')\""
+    "build": "tsc && node -e \"require('fs').chmodSync('build/index.js', '755')\"",
+    "discover": "node build/discover-bridge.js",
+    "setup": "node build/discover-bridge.js --setup-only",
+    "dev": "tsc -w"
   }
 }
