@@ -13,14 +13,18 @@ Built with:
 ### Prerequisites
 
 - Philips Hue bridge and lights
-- Hue bridge username and IP (you could run the discovery script to get it)
+- Hue bridge username (API key)
+- Node.js (v14 or higher)
+- npm
+
+## Local API Setup
 
 ### Cursor
 
 1. First, you need to get your Philips Hue bridge IP address and username (API key). If you don't have one, run the discovery script:
 
    ```bash
-   node discover.js
+   node build/discover-bridge.js
    ```
 
    Follow the prompts to press the link button on your Hue bridge and get your API key.
@@ -50,6 +54,92 @@ Same setup as above, and then add the following MCP config:
       "env": {
         "HUE_USERNAME": "YOUR_HUE_USERNAME",
         "BRIDGE_IP": "YOUR_BRIDGE_IP"
+      }
+    }
+  }
+}
+```
+
+## Remote API Setup
+
+This project supports controlling your Philips Hue lights remotely (from outside your local network) using the Hue Remote API. This allows you to control your lights from anywhere with an internet connection.
+
+### Getting Remote API Credentials
+
+1. **Create a Hue Developer Account**:
+
+   - Register at https://developers.meethue.com/
+
+2. **Create a Remote Hue API App**:
+
+   - Go to https://developers.meethue.com/my-apps/
+   - Create a new app with these details:
+     - App name: Choose a name for your app
+     - Callback URL: Use `http://localhost/` for simple testing
+     - Application description: Brief description of your app
+   - After creating the app, you'll receive:
+     - Client ID
+     - Client Secret
+
+3. **Get Access and Refresh Tokens**:
+
+   a. Construct an authorization URL and open it in your browser:
+
+   ```
+   https://api.meethue.com/oauth2/auth?clientid=YOUR_CLIENT_ID&response_type=code&state=anystring&appid=YOUR_APP_NAME&deviceid=test-device&devicename=TestDevice
+   ```
+
+   Replace `YOUR_CLIENT_ID` and `YOUR_APP_NAME` with your values.
+
+   b. Log in with your Hue developer account and authorize the app
+
+   c. You'll be redirected to your callback URL with a code parameter
+
+   d. Extract the code from the URL (e.g., `?code=abcd1234&state=anystring`)
+
+   e. Exchange the code for tokens using cURL or Postman:
+
+   ```bash
+   curl -X POST https://api.meethue.com/oauth2/token \
+     -d "code=YOUR_AUTHORIZATION_CODE&grant_type=authorization_code" \
+     -u "YOUR_CLIENT_ID:YOUR_CLIENT_SECRET"
+   ```
+
+   f. The response will contain:
+
+   ```json
+   {
+     "access_token": "YOUR_ACCESS_TOKEN",
+     "refresh_token": "YOUR_REFRESH_TOKEN",
+     "token_type": "bearer",
+     "expires_in": 604800
+   }
+   ```
+
+   Store these tokens securely - the access token is valid for about 7 days, and the refresh token for about 100 days.
+
+### Using Remote API with Cursor or Claude Desktop
+
+For Cursor, add the remote credentials to your MCP configuration:
+
+```bash
+node ABSOLUTE_PATH_TO_MCP_SERVER/build/index.js --remote=true --client_id=YOUR_CLIENT_ID --client_secret=YOUR_CLIENT_SECRET --access_token=YOUR_ACCESS_TOKEN --refresh_token=YOUR_REFRESH_TOKEN
+```
+
+For Claude Desktop, add this to your MCP config:
+
+```json
+{
+  "mcpServers": {
+    "control_lights": {
+      "command": "node",
+      "args": ["ABSOLUTE_PATH_TO_MCP_SERVER/build/index.js"],
+      "env": {
+        "USE_REMOTE": "true",
+        "REMOTE_CLIENT_ID": "YOUR_CLIENT_ID",
+        "REMOTE_CLIENT_SECRET": "YOUR_CLIENT_SECRET",
+        "REMOTE_ACCESS_TOKEN": "YOUR_ACCESS_TOKEN",
+        "REMOTE_REFRESH_TOKEN": "YOUR_REFRESH_TOKEN"
       }
     }
   }
@@ -87,14 +177,15 @@ Parameters:
 
 Since MCP tools run remotely, they cannot directly access your local network. To use this tool:
 
-1. Make sure your Cursor or Claude Desktop is running on the same network as your Hue bridge (TODO - maybe add instructions for proxy?)
-2. Ensure the bridge IP address is correct and accessible
-3. If you're having connection issues, try using the included `control-lights.js` script directly:
-   ```bash
-   node control-lights.js
-   # or to turn off
-   node control-lights.js off
-   ```
+1. For local control:
+
+   - Make sure your Cursor or Claude Desktop is running on the same network as your Hue bridge
+   - Ensure the bridge IP address is correct and accessible
+
+2. For remote control:
+   - Set up the Remote API credentials as described above
+   - No need to be on the same network as your Hue bridge
+   - Your Hue bridge must be connected to the internet
 
 ## Development
 
