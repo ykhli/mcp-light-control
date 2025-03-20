@@ -2,7 +2,14 @@
 
 **This MCP server allows Cursor or Claude Desktop to control Philips Hue lights and send messages through them using Morse code.**
 
-💡Example use case💡: tell Cursor agent to send a Morse code message to you when it's done with a task.
+💡**Example use case**💡: tell Cursor agent to send a Morse code message to you when it's done with a task.
+
+
+## Demo
+
+https://www.youtube.com/watch?v=GM1l98TtZmk
+
+[![Cursor agent sends Morse code through my lamp](http://img.youtube.com/vi/GM1l98TtZmk/0.jpg)](https://www.youtube.com/watch?v=GM1l98TtZmk)
 
 Built with:
 
