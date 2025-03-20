@@ -1,6 +1,8 @@
-# Morse Code Light Service 💡
+# Morse Code Light MCP Server (Philips Hue) 💡
 
-This MCP server allows you to control Philips Hue lights and send messages through them using Morse code. Now you can let Cursor or Claude Desktop control your smart lights and transmit messages through light patterns!
+**This MCP server allows Cursor or Claude Desktop to control Philips Hue lights and send messages through them using Morse code.**
+
+💡Example use case💡: tell Cursor agent to send a Morse code message to you when it's done with a task.
 
 Built with:
 
@@ -15,13 +17,12 @@ Built with:
 - Philips Hue bridge and lights
 - Hue bridge username (API key)
 - Node.js (v14 or higher)
-- npm
+- Cursor or Claude Desktop
 
 ## Local API Setup
 
-### Cursor
-
-1. First, obtain your Philips Hue bridge IP address and username (API key). If you don't have one, run the discovery script:
+1. Clone this repository locally.
+2. Obtain your Philips Hue bridge IP address and username. If you don't have one, run the discovery script:
 
    ```bash
    node build/discover-bridge.js
@@ -29,21 +30,9 @@ Built with:
 
    Follow the prompts to press the link button on your Hue bridge and receive your API key.
 
-2. Clone this project locally.
-
 3. Run `npm install` followed by `npm run build` in the project directory. This will generate the MCP server script in the `/build` directory.
 
-4. In Cursor, navigate to Settings -> MCP -> Add new MCP server:
-
-   - Name: `control_lights` (or choose your own name)
-   - Type: command
-   - Command: `node ABSOLUTE_PATH_TO_MCP_SERVER/build/index.js --hue_username=YOUR_HUE_USERNAME --bridge_ip=YOUR_BRIDGE_IP`
-
-You can also set these values as environment variables in the MCP configuration.
-
-### Claude Desktop
-
-Complete the same setup as above, then add the following MCP configuration:
+4. Add the following MCP configuration. In Cursor it's under Settings -> MCP -> Add new MCP server. In Claude Desktop it's under Settings -> MCP -> Add new MCP server.
 
 ```json
 {
@@ -118,15 +107,7 @@ This project supports controlling your Philips Hue lights remotely (from outside
 
    Store these tokens securely. The access token is valid for approximately 7 days, and the refresh token for approximately 100 days.
 
-### Using Remote API with Cursor or Claude Desktop
-
-For Cursor, add the remote credentials to your MCP configuration:
-
-```bash
-node ABSOLUTE_PATH_TO_MCP_SERVER/build/index.js --remote=true --client_id=YOUR_CLIENT_ID --client_secret=YOUR_CLIENT_SECRET --access_token=YOUR_ACCESS_TOKEN --refresh_token=YOUR_REFRESH_TOKEN
-```
-
-For Claude Desktop, add this to your MCP configuration:
+Add this to your MCP configuration:
 
 ```json
 {
@@ -173,29 +154,9 @@ Parameters:
 - `speed_multiplier` (number, optional): Speed multiplier for the Morse code (0.1 to 5, default 1)
 - `restore_state` (boolean, optional): Whether to restore lights to their original state after sending
 
-## Important Notes
-
-Since MCP tools run remotely, they cannot directly access your local network. To use this tool:
-
-1. For local control:
-
-   - Ensure your Cursor or Claude Desktop is running on the same network as your Hue bridge
-   - Verify the bridge IP address is correct and accessible
-
-2. For remote control:
-   - Set up the Remote API credentials as described above
-   - You don't need to be on the same network as your Hue bridge
-   - Your Hue bridge must be connected to the internet
-
 ## Development
 
 ```bash
 npm install
 npm run build
-```
-
-For development mode:
-
-```bash
-npm run dev
 ```
