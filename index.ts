@@ -185,6 +185,9 @@ async function controlLights(
 const server = new McpServer({
   name: "morse-code-light-service",
   version: "1.0.0",
+  jsonrpc: "2.0",
+  strict: false,
+  allowMethodsInBatch: true,
 });
 
 server.tool(
@@ -530,7 +533,7 @@ server.tool(
           // Get all lights and store original states
           lights = await api.getLights();
           lightIds = Object.keys(lights);
-          console.log("originalState: \n", originalStates);
+
           if (restore_state) {
             for (const [id, light] of Object.entries(lights)) {
               originalStates[id] = {
@@ -568,66 +571,76 @@ server.tool(
           })
         );
 
-        // Brief pause before starting
+        // Brief pause before starting - consistent between local and remote
         await sleep(adjustedWordSpace);
+
+        // Light configuration to use for both local and remote
+        const lightOnState = {
+          on: true,
+          bri: 254,
+          sat: 254,
+          hue: 10000,
+        };
 
         for (let i = 0; i < parts.length; i++) {
           const symbol = parts[i];
 
           switch (symbol) {
             case ".":
-              if (USE_REMOTE) {
-                // Turn lights on
-                await Promise.all(
-                  lightIds.map((id) =>
-                    api.lights.setLightState(id, {
-                      on: true,
-                      bri: 254,
-                      sat: 254,
-                      hue: 10000,
-                    })
-                  )
-                );
-                await sleep(adjustedDot);
-                // Turn lights off
-                await Promise.all(
-                  lightIds.map((id) =>
-                    api.lights.setLightState(id, { on: false })
-                  )
-                );
-              } else {
-                await controlLights(api, lights, { on: true });
-                await sleep(adjustedDot);
-                await controlLights(api, lights, { on: false });
-              }
+              // Turn lights on - unified code for both APIs
+              await Promise.all(
+                lightIds.map((id) => {
+                  if (USE_REMOTE) {
+                    return api.lights.setLightState(id, lightOnState);
+                  } else {
+                    return api.setLightState(id, lightOnState);
+                  }
+                })
+              );
+
+              // Consistent sleep duration
+              await sleep(adjustedDot);
+
+              // Turn lights off - unified code for both APIs
+              await Promise.all(
+                lightIds.map((id) => {
+                  if (USE_REMOTE) {
+                    return api.lights.setLightState(id, { on: false });
+                  } else {
+                    return api.setLightState(id, { on: false });
+                  }
+                })
+              );
+
               await sleep(adjustedSymbolSpace);
               break;
 
             case "-":
-              if (USE_REMOTE) {
-                // Turn lights on
-                await Promise.all(
-                  lightIds.map((id) =>
-                    api.lights.setLightState(id, {
-                      on: true,
-                      bri: 254,
-                      sat: 254,
-                      hue: 10000,
-                    })
-                  )
-                );
-                await sleep(adjustedDash);
-                // Turn lights off
-                await Promise.all(
-                  lightIds.map((id) =>
-                    api.lights.setLightState(id, { on: false })
-                  )
-                );
-              } else {
-                await controlLights(api, lights, { on: true });
-                await sleep(adjustedDash);
-                await controlLights(api, lights, { on: false });
-              }
+              // Turn lights on - unified code for both APIs
+              await Promise.all(
+                lightIds.map((id) => {
+                  if (USE_REMOTE) {
+                    return api.lights.setLightState(id, lightOnState);
+                  } else {
+                    return api.setLightState(id, lightOnState);
+                  }
+                })
+              );
+
+              // Consistent sleep duration
+              await sleep(adjustedDash);
+
+              // Turn lights off - unified code for both APIs
+              await Promise.all(
+                lightIds.map((id) => {
+                  if (USE_REMOTE) {
+                    return api.lights.setLightState(id, { on: false });
+                  } else {
+                    return api.setLightState(id, { on: false });
+                  }
+                })
+              );
+
               await sleep(adjustedSymbolSpace);
               break;
 
