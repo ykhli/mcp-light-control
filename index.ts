@@ -60,7 +60,7 @@ const MORSE_CODE: MorseCode = {
 };
 
 // Timing constants (in milliseconds)
-const DOT_DURATION = 200;
+const DOT_DURATION = 800;
 const DASH_DURATION = DOT_DURATION * 3;
 const SYMBOL_SPACE = DOT_DURATION;
 const LETTER_SPACE = DOT_DURATION * 3;
@@ -502,9 +502,9 @@ server.tool(
             for (const light of allLights) {
               originalStates[light.id] = {
                 on: light.state.on,
-                bri: light.state.brightness,
+                bri: light.state.bri,
                 hue: light.state.hue,
-                sat: light.state.saturation,
+                sat: light.state.sat,
               };
             }
           }
@@ -530,7 +530,7 @@ server.tool(
           // Get all lights and store original states
           lights = await api.getLights();
           lightIds = Object.keys(lights);
-
+          console.log("originalState: \n", originalStates);
           if (restore_state) {
             for (const [id, light] of Object.entries(lights)) {
               originalStates[id] = {
@@ -557,18 +557,39 @@ server.tool(
       const parts = morseCode.split("");
 
       try {
+        // Initialize all lights to off before starting
+        await Promise.all(
+          lightIds.map((id) => {
+            if (USE_REMOTE) {
+              return api.lights.setLightState(id, { on: false });
+            } else {
+              return api.setLightState(id, { on: false });
+            }
+          })
+        );
+
+        // Brief pause before starting
+        await sleep(adjustedWordSpace);
+
         for (let i = 0; i < parts.length; i++) {
           const symbol = parts[i];
 
           switch (symbol) {
             case ".":
               if (USE_REMOTE) {
+                // Turn lights on
                 await Promise.all(
                   lightIds.map((id) =>
-                    api.lights.setLightState(id, { on: true })
+                    api.lights.setLightState(id, {
+                      on: true,
+                      bri: 254,
+                      sat: 254,
+                      hue: 10000,
+                    })
                   )
                 );
                 await sleep(adjustedDot);
+                // Turn lights off
                 await Promise.all(
                   lightIds.map((id) =>
                     api.lights.setLightState(id, { on: false })
@@ -584,12 +605,19 @@ server.tool(
 
             case "-":
               if (USE_REMOTE) {
+                // Turn lights on
                 await Promise.all(
                   lightIds.map((id) =>
-                    api.lights.setLightState(id, { on: true })
+                    api.lights.setLightState(id, {
+                      on: true,
+                      bri: 254,
+                      sat: 254,
+                      hue: 10000,
+                    })
                   )
                 );
                 await sleep(adjustedDash);
+                // Turn lights off
                 await Promise.all(
                   lightIds.map((id) =>
                     api.lights.setLightState(id, { on: false })
@@ -625,17 +653,17 @@ server.tool(
                 // First turn on to set properties, then turn off
                 await api.lights.setLightState(lightId, {
                   on: true,
-                  brightness: state.bri || 254,
+                  bri: state.bri || 254,
                   hue: state.hue,
-                  saturation: state.sat,
+                  sat: state.sat,
                 });
                 await api.lights.setLightState(lightId, { on: false });
               } else {
                 await api.lights.setLightState(lightId, {
                   on: true,
-                  brightness: state.bri || 254,
+                  bri: state.bri || 254,
                   hue: state.hue,
-                  saturation: state.sat,
+                  sat: state.sat,
                 });
               }
             }
@@ -666,7 +694,7 @@ server.tool(
               type: "text",
               text: `Successfully sent message "${message}" in Morse code (${morseCode}) using ${
                 USE_REMOTE ? "Remote" : "Local"
-              } API`,
+              } API. originalStates: ${JSON.stringify(originalStates)}`,
             },
           ],
         };
