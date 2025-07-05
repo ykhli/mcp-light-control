@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/ykhli-mcp-light-control-badge.png)](https://mseep.ai/app/ykhli-mcp-light-control)
+
 # Morse Code Light MCP Server (Philips Hue) 💡
 
 This MCP server allows Cursor or Claude Desktop to **control Philips Hue lights and send messages through them using Morse code**.
